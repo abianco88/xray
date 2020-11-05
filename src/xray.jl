@@ -12,7 +12,7 @@
 
 
 module PreliminaryQC
-using CSV, DataFrames, DataStructures, Statistics    # NEED TO CHECK IF PACKAGE CSV IS STILL NEEDED!!!
+using DataFrames, DataStructures, Statistics
 
 function make_dfs(df::DataFrame, rs::DataFrame)
     res_expsd = rs[:, [:orid, :samp]];
