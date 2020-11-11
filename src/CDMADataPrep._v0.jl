@@ -1,5 +1,5 @@
 #=
-# --> NOTE: `imp_week` is never used in the reporting! Maybe remove it?
+# --> NOTE: `imp_week` is never used in the reporting! Maybe remove it? NO! It's used in the `format_unify_reports` function
 =#
 
 
