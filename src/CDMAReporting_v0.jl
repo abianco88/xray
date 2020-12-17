@@ -306,7 +306,7 @@ function upc_growth(dfa::DataFrame, upc_data::DataFrame);
 end
 
 function freq_HH_Cum1stpur(combined::DataFrame, freq_index::DataFrame)
-    #= For `First_Buy_by_Frequency_Digital_std`, compute the frequency (number of HHs) of exposures before first purchase (capped to 10 exposures), the cumulative frequency, and the cumulative frequency percentage of total exposures before the first purchase. For `First_Buy_by_Frequency_Digital_Dyn`, compute the frequency (number of HHs) of exposure levels (ranges of exposures) before first purchase (capped), the cumulative frequency, and the cumulative percentage of total exposure levels before the first purchase =#
+    #= For `First_Buy_by_Frequency_Digital_std`, compute the frequency (number of HHs) of exposures before first purchase (capped to 10 exposures), the cumulative frequency, and the cumulative frequency percentage of total exposures before the first purchase. For `First_Buy_by_Frequency_Digital_Dyn`, compute the frequency (number of HHs) of exposure levels (ranges of exposures) before first purchase (capped), the cumulative frequency, and the cumulative percentage of total exposure levels before the first purchase. =#
     Exposed_Buyer = deepcopy(combined[combined[:Number_exposure_before_1st_buy] .!= 0, [:Number_exposure_before_1st_buy]]);
     Exposed_Buyer[Exposed_Buyer[:Number_exposure_before_1st_buy] .>= 10, :Number_exposure_before_1st_buy] = 10;
     Exposed_Buyer_1 = by(Exposed_Buyer, [:Number_exposure_before_1st_buy], nrow);
@@ -339,7 +339,7 @@ function freq_HH_Cum1stpur(combined::DataFrame, freq_index::DataFrame)
 end
 
 function freq_HH_buying(combined::DataFrame)
-    #= Calculate the count of HHs and the proportion of the total HHs per number of exposures (capped to 10) =#
+    #= Calculate the count of HHs and the proportion of the total HHs per number of exposures (capped to 10). =#
     buyer_freq = deepcopy(combined[:, [:Exposures]]);
     buyer_freq[buyer_freq[:Exposures] .>= 10, :Exposures] = 10;
     buyer_freq_1 = by(buyer_freq, [:Exposures], nrow);
@@ -387,7 +387,7 @@ function Total_freq_digital(hhcounts_date::DataFrame)
 end
 
 function Cum_IMP(expocnt::DataFrame)
-    #= By exposure level (i.e., number of exposures), compute the number of of HHs, the number of impressions served (= exposures*HHs), the cumulative number of impressions served, and the capped impressions served. Capped impressions served are calculated as the product of the total HHs from each exposure level to the max exposure level and the number of exposures for that level, summed to the previous level value [--> NOTE: Not sure `imps_served_capped` is a clear label. The metric measures the number of impressions that has translated to at least as many exposures as the exposure level.]. =#
+    #= By exposure level (i.e., number of exposures), compute the number of of HHs, the number of impressions served (= exposures*HHs), the cumulative number of impressions served, and the capped impressions served. Capped impressions served are calculated as the sum of the product of the total HHs having at least a level of exposures and that level of exposure and the total impressions served across all smaller exposure level [--> NOTE: Not sure `imps_served_capped` is a clear label. The metric measures the number of impressions that has translated to at least as many exposures as the exposure level.]. =#
     Cum_IMPs = by(expocnt, [:Exposures], nrow);
     names!(Cum_IMPs, [:Exposures, :HHs]);
     Cum_IMPs[:imps_Served] = map(Int, Cum_IMPs[:HHs].*Cum_IMPs[:Exposures]);
@@ -407,7 +407,7 @@ function Cum_IMP(expocnt::DataFrame)
 end
 
 function Buyer_Frequency_Characteristics(hhcounts_date::DataFrame, dfd::DataFrame)
-    #= Create table mapping IRI weeks to "real time" weeks for the campaign period. For each IRI week, compute the number of lapsed buyers, brand switch buyers, brand buyers, and category buyers (exposed_buyer_by_week). For each IRI week, compute the proportion of cumulative sum of the count of lapsed buyers, brand switch buyers, brand buyers, and category buyers throughout the entire campaign, i.e., across all weeks (cumulative_by_week). =#
+    #= Create table mapping IRI weeks to "real time" weeks for the campaign period. For each IRI week, compute the number of impressions for lapsed buyers, brand switch buyers, brand buyers, and category buyers (exposed_buyer_by_week). For each IRI week, compute the cumulative proportion of total impressions for lapsed buyers, brand switch buyers, brand buyers, and category buyers throughout the entire campaign, i.e., across all weeks (cumulative_by_week). =#
     df = Dates.DateFormat("y-m-d");
     dt_base = Date("2014-12-28", df);
     buyer_exposure = join(dfd, hhcounts_date, on=:panid, kind=:inner);
