@@ -1,0 +1,2701 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="https://advantage.iriworldwide.com/unify-summit/favicon.ico" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="IRI Visualization Tool" />
+    <title>IRI Worldwide | Diagnostics Visualization Tool</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <!-- Font families-->
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300&display=swap">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300">
+    <!-- CSS Style -->
+    <style>
+        .header {
+            overflow: hidden;
+            background-color: white;
+            padding: 5px 2px;
+        }
+        /* bootstrap hack: fix content width inside hidden tabs */
+        
+        .tab-content>.tab-pane:not(.active),
+        .pill-content>.pill-pane:not(.active) {
+            display: block;
+            height: 0;
+            overflow-y: hidden;
+        }
+        /* bootstrap hack end */
+        
+        * {
+            box-sizing: border-box
+        }
+        /* Style the tab */
+        
+        .tab {
+            float: left;
+            /*order: 1px solid silver;*/
+            background-color: white;
+            width: 15%;
+            /*height: 580px;*/
+        }
+        /* Style the buttons that are used to open the tab content */
+        
+        .tab button {
+            display: block;
+            background-color: inherit;
+            color: black;
+            padding: 22px 16px;
+            width: 100%;
+            border: none;
+            outline: none;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        /* Change background color of buttons on hover */
+        
+        .tab button:hover {
+            background-color: gainsboro;
+        }
+        /* Create an active/current "tab button" class */
+        
+        .tab button.active {
+            background-color: lightgray;
+        }
+        /* Style the tab content */
+        
+        .tabcontent {
+            display: none;
+            float: left;
+            padding: 0px 12px;
+            border: 1px solid silver;
+            width: 85%;
+            border-left: none;
+            /*height: 580px;*/
+        }
+        /* Style the links inside the pill navigation menu */
+        
+        .nav-pills a {
+            background-color: transparent !important;
+        }
+        /* Change the color of links on mouse-over */
+        
+        .nav-pills a:hover {
+            background-color: coral !important;
+        }
+        
+        .btn_tab {
+            background-color: dodgerblue;
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 5px 10px;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .btn_tab:hover {
+            background-color: coral !important;
+        }
+        
+        .btn_tab.active {
+            background-color: darkblue !important;
+        }
+        
+        .btn_tab:focus {
+            outline: 0;
+            background-color: darkblue !important;
+        }
+        /* Legend appearence options */
+        
+        fieldset {
+            background-color: #eeeeee;
+            border: 2px solid gray;
+        }
+        
+        legend {
+            background-color: gray;
+            color: white;
+        }
+        
+        .the-legend {
+            border: 1px solid gray;
+            border-width: 2px;
+            font-size: 14px;
+            line-height: 16px;
+            margin-bottom: 10px;
+            width: auto;
+            padding: 5px 10px;
+        }
+        
+        .my-legend .legend-scale ul li {
+            display: inline-block;
+            font-size: 80%;
+            list-style: none;
+            line-height: 18px;
+            vertical-align: text-top;
+        }
+        
+        .my-legend ul.legend-labels li span {
+            display: inline-block;
+            height: 16px;
+            width: 20px;
+            margin-right: 5px;
+            margin-left: 10px;
+            border: 1px solid #999;
+        }
+    </style>
+    <!-- JavaScript: jQuery first, then Popper.js, then Bootstrap compiled JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
+    <!-- chartjs-plugin-annotation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/0.5.7/chartjs-plugin-annotation.min.js"></script>
+    <!-- chartjs-plugin-datalabels -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
+</head>
+
+<body><noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root">
+        <div id="page-wrap">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="tab order-last">
+                        <div style="text-align: center"><img src="https://advantage.iriworldwide.com/unify-summit/externals/logos/iri-logo-white.png" alt="IRI Logo" style="vertical-align:top"></div>
+                        <button class="tablinks" onclick="openMainTab(event, 'Page1')" id="defaultOpen">Campaign Effectiveness</button>
+                        <button class="tablinks" onclick="openMainTab(event, 'Page2')">Buyer Type Classification</button>
+                        <button class="tablinks" onclick="openMainTab(event, 'Page3')">Exposure Path</button>
+                        <button class="tablinks" onclick="openMainTab(event, 'Page4')">Distributions and Interactions</button>
+                        <button class="tablinks" onclick="openMainTab(event, 'Page5')">Scored File Visualization</button>
+                    </div>
+
+                    <div id="Page1" class="tabcontent">
+                        <ul class="nav nav-pills justify-content-center">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-toggle="pill" href="#Page1_Tab1">
+                                    <button id="btn_tab_default" class="btn_tab">Product Sales</button>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="pill" href="#Page1_Tab2">
+                                    <button class="btn_tab">Exp/UnExp Product Sales</button>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="pill" href="#Page1_Tab3">
+                                    <button class="btn_tab">Fair Share</button>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="pill" href="#Page1_Tab4">
+                                    <button class="btn_tab">Growth Contribution by UPC</button>
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div id="Page1_Tab1" class="tab-pane container fade in show active">
+                                <div id="Page1_Tab1_Chart_Box" class="stats_box">
+                                    <canvas id="Page1_Tab1_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 20%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>Pre-campaign</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(255, 140, 15, 1);'></span></li>
+                                                            <li>Post-campaign</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 80%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>The chart shows the pre- and post-campaign dollar sales of ** the target brand ** and competitors for the exposed HHs buying the target brand in the post-campaign period.</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                            <div id="Page1_Tab2" class="tab-pane container fade">
+                                <div id="Page1_Tab2_Chart_Box" class="stats_box">
+                                    <canvas id="Page1_Tab2_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 25%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>Pre-Campaign Dollar</li>
+                                                            <li style="margin-left: 40px">Sales - Exposed</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 0.4);'></span></li>
+                                                            <li>Pre-Campaign Dollar</li>
+                                                            <li style="margin-left: 40px">Sales - UnExposed</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(255, 140, 15, 1);'></span></li>
+                                                            <li>Post-Campaign Dollar</li>
+                                                            <li style="margin-left: 40px">Sales - Exposed</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(255, 140, 15, 0.4);'></span></li>
+                                                            <li>Post-Campaign Dollar</li>
+                                                            <li style="margin-left: 40px">Sales - UnExposed</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 75%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>The chart shows the pre- and post-campaign dollar sales by "product ID", i.e., total brand level, for the exposed and unexposed buying Households.</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                            <div id="Page1_Tab3" class="tab-pane container fade">
+                                <div id="Page1_Tab3_Chart_Box" class="stats_box">
+                                    <canvas id="Page1_Tab3_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 30%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>Contribution to Target Brand</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(247, 202, 24, 1);'></span></li>
+                                                            <li>Fair Share Index</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 70%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>The chart shows the proportion of the change in the target brand dollar sales coming from the change in each competitors' product dollar sales. The <i>Fair Share Index</i> adjusts that for the pre-campaign share of the total competitors' sales.</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                            <div id="Page1_Tab4" class="tab-pane container fade">
+                                <div id="Page1_Tab4_Chart_Box" class="stats_box">
+                                    <canvas id="Page1_Tab4_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 25%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>Sales Pre-Campaign</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(255, 140, 15, 1);'></span></li>
+                                                            <li>Sales Post-Campaign</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(247, 202, 24, 1);'></span></li>
+                                                            <li>Target Brand's Sales</li>
+                                                            <li style="margin-left: 40px">Growth Contribution</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 75%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>The chart shows the pre- and post-campaign proportion of the dollar sales of each listed UPC, as well as the breakdown of the contribution of each UPC to the target brand sales' growth during the campaign period (it only considers UPCs with a positive contribution to the target brand sales).</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="Page2" class="tabcontent">
+                        <ul class="nav nav-pills justify-content-center">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-toggle="pill" href="#Page2_Tab1">
+                                    <button id="btn_tab_default" class="btn_tab">Exposed</button>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="pill" href="#Page2_Tab2">
+                                    <button class="btn_tab">UnExposed</button>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="pill" href="#Page2_Tab3">
+                                    <button class="btn_tab">Impressions Distribution</button>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="pill" href="#Page2_Tab4">
+                                    <button class="btn_tab">Impressions Cumulative Distribution</button>
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div id="Page2_Tab1" class="tab-pane container fade in show active">
+                                <div id="Page2_Tab1_Chart_Box" class="stats_box">
+                                    <canvas id="Page2_Tab1_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 25%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(255, 140, 15, 1);'></span></li>
+                                                            <li>Brand Buyers</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>Non Buyers</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(219, 10, 91, 1);'></span></li>
+                                                            <li>Lapsed Buyers</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(247, 202, 24, 1);'></span></li>
+                                                            <li>New Buyers</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(145, 61, 136, 1);'></span></li>
+                                                            <li>Repeat Buyers</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 177, 106, 1);'></span></li>
+                                                            <li>Category Switcher</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(217, 30, 24, 1);'></span></li>
+                                                            <li>Brand Switcher</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 75%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>The chart shows the proportion of exposed Households in the different buyer categories (adjusted for scored.csv values).</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                            <div id="Page2_Tab2" class="tab-pane container fade">
+                                <div id="Page2_Tab2_Chart_Box" class="stats_box">
+                                    <canvas id="Page2_Tab2_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 25%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(255, 140, 15, 1);'></span></li>
+                                                            <li>Brand Buyers</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>Non Buyers</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(219, 10, 91, 1);'></span></li>
+                                                            <li>Lapsed Buyers</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(247, 202, 24, 1);'></span></li>
+                                                            <li>New Buyers</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(145, 61, 136, 1);'></span></li>
+                                                            <li>Repeat Buyers</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 177, 106, 1);'></span></li>
+                                                            <li>Category Switcher</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(217, 30, 24, 1);'></span></li>
+                                                            <li>Brand Switcher</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 75%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>The chart shows the proportion of unexposed Households in the different buyer categories (adjusted for scored.csv values).</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                            <div id="Page2_Tab3" class="tab-pane container fade">
+                                <div id="Page2_Tab3_Chart_Box" class="stats_box">
+                                    <canvas id="Page2_Tab3_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 25%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(21, 199, 87, 1);'></span></li>
+                                                            <li>LAPSED BUYERS</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(145, 61, 136, 1);'></span></li>
+                                                            <li>BRAND SWITCH BUYERS</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(247, 202, 24, 1);'></span></li>
+                                                            <li>BRAND BUYERS</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>CATEGORY BUYERS</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 75%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>The chart represents the number of impressions recorded in each week of the campaign for lapsed buyers, brand switch buyers, brand buyers, and category buyers.</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                            <div id="Page2_Tab4" class="tab-pane container fade">
+                                <div id="Page2_Tab4_Chart_Box" class="stats_box">
+                                    <canvas id="Page2_Tab4_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 25%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>LAPSED BUYERS</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(255, 140, 15, 1);'></span></li>
+                                                            <li>BRAND SWITCH BUYERS</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(247, 202, 24, 1);'></span></li>
+                                                            <li>BRAND BUYERS</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(145, 61, 136, 1);'></span></li>
+                                                            <li>CATEGORY BUYERS</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 75%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>The chart plots the cumulative proportion of impressions for lapsed buyers, brand switch buyers, brand buyers, and category buyers for each week of the campaign period.</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="Page3" class="tabcontent">
+                        <ul class="nav nav-pills justify-content-center">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-toggle="pill" href="#Page3_Tab1">
+                                    <button id="btn_tab_default" class="btn_tab">Exposures by Buying HHs</button>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="pill" href="#Page3_Tab2">
+                                    <button class="btn_tab">Time Lapsed</button>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="pill" href="#Page3_Tab3">
+                                    <button class="btn_tab">Exposures Before 1st Buy</button>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="pill" href="#Page3_Tab4">
+                                    <button class="btn_tab">Impressions</button>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="pill" href="#Page3_Tab5">
+                                    <button class="btn_tab">Exposures & Impressions</button>
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div id="Page3_Tab1" class="tab-pane container fade in show active">
+                                <div id="Page3_Tab1_Chart_Box" class="stats_box">
+                                    <canvas id="Page3_Tab1_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 25%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>Frequency</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(247, 202, 24, 1);'></span></li>
+                                                            <li>Relative Frequency</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 75%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>Chart reporting the frequency distribution (number of buying Households) per number of exposures (capped to 10 exposures).</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                            <div id="Page3_Tab2" class="tab-pane container fade">
+                                <div id="Page3_Tab2_Chart_Box" class="stats_box">
+                                    <canvas id="Page3_Tab2_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 30%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>Frequency</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(255, 140, 15, 1);'></span></li>
+                                                            <li>Average Number of Exposures</li>
+                                                            <li style="margin-left: 40px">to First Purchase</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 70%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>Chart reporting the distribution of the number of weeks lapsed between the last exposure and the first purchase of the target brand (frequency is the number of Households), as well as the average number of exposures before the first purchase per each time level.</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                            <div id="Page3_Tab3" class="tab-pane container fade">
+                                <div id="Page3_Tab3_Chart_Box" class="stats_box">
+                                    <canvas id="Page3_Tab3_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 25%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>Frequency</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(247, 202, 24, 1);'></span></li>
+                                                            <li>Cumulative Frequency</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 75%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>The chart reports the frequency (number of Households) and the cumulative frequency of the number of exposures received before the first purchase (capped to 10 exposures).</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                            <div id="Page3_Tab4" class="tab-pane container fade">
+                                <div id="Page3_Tab4_Chart_Box" class="stats_box">
+                                    <canvas id="Page3_Tab4_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 20%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>Frequency</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 80%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>Chart showing the frequency (number of reached Households) of the number of impressions (capped to 10 impressions) during the entire campaign. [Based on hhcount_date.csv]</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                            <div id="Page3_Tab5" class="tab-pane container fade">
+                                <div id="Page3_Tab5_Chart_Box" class="stats_box">
+                                    <canvas id="Page3_Tab5_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 30%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>HHs Reached</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(255, 140, 15, 1);'></span></li>
+                                                            <li>Impressions Served</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(247, 202, 24, 1);'></span></li>
+                                                            <li>Cumulative Impressions Served</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(145, 61, 136, 1);'></span></li>
+                                                            <li>Cumulative Impressions Served</li>
+                                                            <li style="margin-left: 40px">for Exposure Level</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 70%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>The chart plots the distribution of the number of exposures per Households (number of Households per exposure level), the total number of impressions served (calculated as exposures*Households) for each exposure level, the cumulative impressions served (cumulative sum of impressions served), and the cumulative impressions served for exposure level.</small></p>
+                                                <p style="margin-right: 5%; font-size: 10px"><b>Note:</b> <i>Cumulative Impressions Served for Exposure Level</i> measures the total impressions served to lower levels of exposure plus the total impressions served to the HHs with at least the given
+                                                    level of exposure (e.g.,
+                                                    <i>Cumulative Impressions Served for 3 Exposures</i> is calculated by summing the impressions served to exposure level 1 and 2, plus the total number of impressions served to HHs with at least 3 exposures).</p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="Page4" class="tabcontent">
+                        <ul class="nav nav-pills justify-content-center">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-toggle="pill" href="#Page4_Tab1">
+                                    <button id="btn_tab_default" class="btn_tab">Proscore</button>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="pill" href="#Page4_Tab2">
+                                    <button class="btn_tab">Retailer</button>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="pill" href="#Page4_Tab3">
+                                    <button class="btn_tab">DollOcc/Target Brand Buyers</button>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="pill" href="#Page4_Tab4">
+                                    <button class="btn_tab">DollOcc/Category Buyers</button>
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div id="Page4_Tab1" class="tab-pane container fade in show active">
+                                <div id="Page4_Tab1_Chart_Box" class="stats_box">
+                                    <canvas id="Page4_Tab1_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 20%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>Control</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(255, 140, 15, 1);'></span></li>
+                                                            <li>Exposed</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 80%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>Chart representing the empirical distribution of proscores (=model) for exposed and control HHs.</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                            <div id="Page4_Tab2" class="tab-pane container fade">
+                                <div id="Page4_Tab2_Chart_Box" class="stats_box">
+                                    <canvas id="Page4_Tab2_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 20%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>Control</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(255, 140, 15, 1);'></span></li>
+                                                            <li>Exposed</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 80%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>Chart representing the empirical distribution of retailers (=banner) for exposed and control HHs.</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                            <div id="Page4_Tab3" class="tab-pane container fade">
+                                <div id="Page4_Tab3_Chart_Box" class="stats_box">
+                                    <canvas id="Page4_Tab3_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 30%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>Exposed Pre-Campaign</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(255, 140, 15, 1);'></span></li>
+                                                            <li>UnExposed Pre-Campaign</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(247, 202, 24, 1);'></span></li>
+                                                            <li>Exposed Post-Campaign</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(145, 61, 136, 1);'></span></li>
+                                                            <li>UnExposed Post-Campaign</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 80%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>The chart represents the distribution (in bins format) of dollars-per-occasion for target brand buyers in pre- and post-campaign period by exposed and unexposed Households.</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                            <div id="Page4_Tab4" class="tab-pane container fade">
+                                <div id="Page4_Tab4_Chart_Box" class="stats_box">
+                                    <canvas id="Page4_Tab4_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 30%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>Exposed Pre-Campaign</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(255, 140, 15, 1);'></span></li>
+                                                            <li>UnExposed Pre-Campaign</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(247, 202, 24, 1);'></span></li>
+                                                            <li>Exposed Post-Campaign</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(145, 61, 136, 1);'></span></li>
+                                                            <li>UnExposed Post-Campaign</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 70%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>The chart represents the distribution (in bins format) of dollars-per-occasion for category buyers in pre- and post-campaign period by exposed and unexposed Households.</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="Page5" class="tabcontent">
+                        <ul class="nav nav-pills justify-content-center">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-toggle="pill" href="#Page5_Tab1">
+                                    <button id="btn_tab_default" class="btn_tab">Penetration</button>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="pill" href="#Page5_Tab2">
+                                    <button class="btn_tab">Occasions</button>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="pill" href="#Page5_Tab3">
+                                    <button class="btn_tab">Dollars-per-Occasion</button>
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div id="Page5_Tab1" class="tab-pane container fade in show active">
+                                <div id="Page5_Tab1_Chart_Box" class="stats_box">
+                                    <canvas id="Page5_Tab1_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 25%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>Exposed (Raw)</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(255, 140, 15, 1);'></span></li>
+                                                            <li>UnExposed (Raw)</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(247, 202, 24, 1);'></span></li>
+                                                            <li>Exposed (Matched)</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(145, 61, 136, 1);'></span></li>
+                                                            <li>UnExposed (Matched)</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 75%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>Chart showing the proportion of target brand and category buyers in pre-campaign and post-campaign period for the exposed and unexposed Households in the raw data [orig.csv] and in the matched data [descDump.csv].</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                            <div id="Page5_Tab2" class="tab-pane container fade">
+                                <div id="Page5_Tab2_Chart_Box" class="stats_box">
+                                    <canvas id="Page5_Tab2_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 25%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>Exposed (Raw)</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(255, 140, 15, 1);'></span></li>
+                                                            <li>UnExposed (Raw)</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(247, 202, 24, 1);'></span></li>
+                                                            <li>Exposed (Matched)</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(145, 61, 136, 1);'></span></li>
+                                                            <li>UnExposed (Matched)</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 75%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>Chart showing the average trips for target brand and category buyers in pre-campaign and post-campaign period for the exposed and unexposed Households in the raw data [orig.csv] and in the matched data [descDump.csv].</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                            <div id="Page5_Tab3" class="tab-pane container fade">
+                                <div id="Page5_Tab3_Chart_Box" class="stats_box">
+                                    <canvas id="Page5_Tab3_Chart" style="max-width: 100%"></canvas>
+                                    <fieldset style="margin-left: 8%; margin-right: 0%">
+                                        <legend class="the-legend" style="margin-left: 10px">Legend</legend>
+                                        <div style="display: table; width: 100%">
+                                            <div style="display: table-cell; width: 25%">
+                                                <div class='my-legend'>
+                                                    <div class='legend-scale'>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(0, 140, 255, 1);'></span></li>
+                                                            <li>Exposed (Raw)</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(255, 140, 15, 1);'></span></li>
+                                                            <li>UnExposed (Raw)</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(247, 202, 24, 1);'></span></li>
+                                                            <li>Exposed (Matched)</li>
+                                                        </ul>
+                                                        <ul class='legend-labels'>
+                                                            <li><span style='background:rgba(145, 61, 136, 1);'></span></li>
+                                                            <li>UnExposed (Matched)</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style="display: table-cell; width: 75%">
+                                                <p style="margin-right: 5%"><small><b>Description: </b>Chart showing the average dollars-per-trip spent by target brand and category buyers in pre-campaign and post-campaign period for the exposed and unexposed Households in the raw data [orig.csv] and in the matched data [descDump.csv].</small></p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <p></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function openMainTab(evt, MainTabName) {
+            // Declare all variables
+            var i, tabcontent, tablinks;
+
+            // Get all elements with class="tabcontent" and hide them
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+
+            // Get all elements with class="tablinks" and remove the class "active"
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            // Show the current tab, and add an "active" class to the link that opened the tab
+            document.getElementById(MainTabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        // Get the element with id="defaultOpen" and click on it
+        document.getElementById("defaultOpen").click();
+    </script>
+    <script>
+        // Select default active button in tab 1 of page 1
+        document.addEventListener("DOMContentLoaded", function(event) {
+            document.getElementById("btn_tab_default").focus();
+        });
+    </script>
+    <!-- Script for charts below -->
+    <script>
+        Chart.plugins.unregister(ChartDataLabels); // Unregister DataLabels plugin for Chart.js globally
+
+        /* Page 1 Tab 1 Chart: Product Sales */
+        var data_p1_t1_a = [];
+        var data_p1_t1_b = [];
+        var lbl_p1_t1 = [];
+        var trgt_brand_name_p1_t1 = [];
+
+        var ctx_Page1_Tab1 = document.getElementById('Page1_Tab1_Chart').getContext('2d');
+        var Page1_Tab1_Chart = new Chart(ctx_Page1_Tab1, {
+            type: 'bar',
+
+            data: {
+                labels: lbl_p1_t1,
+                datasets: [{
+                    label: 'Pre-campaign',
+                    data: data_p1_t1_a,
+                    backgroundColor: 'rgba(0, 140, 255, 1)',
+                    borderColor: 'rgba(0, 140, 255, 1)',
+                }, {
+                    label: 'Post-campaign',
+                    data: data_p1_t1_b,
+                    backgroundColor: 'rgba(255, 140, 15, 1)',
+                    borderColor: 'rgba(255, 140, 15, 1)',
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Dollar Sales by Product-Brand',
+                    fontSize: 18
+                },
+                scales: {
+                    xAxes: [{
+                        barPercentage: 1, //make bars of same group closer
+                        categoryPercentage: 0.5, //increase distance between bars from different groups
+                        ticks: {
+                            callback: function(value, index, values) {
+                                if (index === 0) {
+                                    return '** ' + value + ' **';
+                                } else {
+                                    return value;
+                                }
+                            }
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Sales ($)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value, index, values) {
+                                if (parseInt(value) >= 1000) {
+                                    return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ", ");
+                                } else {
+                                    return '$' + value;
+                                }
+                            }
+                        }
+                    }]
+                },
+                annotation: {
+                    annotations: [{
+                        drawTime: 'beforeDatasetsDraw',
+                        type: 'box',
+                        xScaleID: 'x-axis-0',
+                        yScaleID: 'y-axis-0',
+                        xMin: trgt_brand_name_p1_t1, //NEED TO PASS NAME OF TARGET BRAND PRODUCT!!!
+                        xMax: trgt_brand_name_p1_t1, //NEED TO PASS NAME OF TARGET BRAND PRODUCT!!!
+                        backgroundColor: 'rgba(101, 33, 171, 0.2)',
+                        borderColor: 'rgba(101, 33, 171, 0.3)',
+                        borderWidth: 70,
+                        onClick: function(e) {
+                            console.log('Box', e.type, this);
+                        }
+                    }]
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        });
+
+        /* Page 1 Tab 2 Chart: Exp/UnExp Product Sales */
+        var data_p1_t2_a = [];
+        var data_p1_t2_b = [];
+        var data_p1_t2_c = [];
+        var data_p1_t2_d = [];
+        var lbl_p1_t2 = [];
+        var trgt_brand_name_p1_t2 = [];
+
+        var ctx_Page1_Tab2 = document.getElementById('Page1_Tab2_Chart').getContext('2d');
+        var Page1_Tab2_Chart = new Chart(ctx_Page1_Tab2, {
+            type: 'bar',
+
+            data: {
+                labels: lbl_p1_t2,
+                datasets: [{
+                    label: 'Pre-Campaign Dollar Sales - EXPOSED',
+                    data: data_p1_t2_a,
+                    backgroundColor: 'rgba(0, 140, 255, 1)',
+                    borderColor: 'rgba(0, 140, 255, 1)',
+                    yAxisID: 'yAxis1',
+                }, {
+                    label: 'Pre-Campaign Dollar Sales - UNEXPOSED',
+                    data: data_p1_t2_c,
+                    backgroundColor: 'rgba(0, 140, 255, 0.4)',
+                    borderColor: 'rgba(0, 140, 255, 1)',
+                    yAxisID: 'yAxis1',
+                }, {
+                    label: 'Post-Campaign Dollar Sales - EXPOSED',
+                    data: data_p1_t2_b,
+                    backgroundColor: 'rgba(255, 140, 15, 1)',
+                    borderColor: 'rgba(255, 140, 15, 1)',
+                    yAxisID: 'yAxis1',
+                }, {
+                    label: 'Post-Campaign Dollar Sales - UNEXPOSED',
+                    data: data_p1_t2_d,
+                    backgroundColor: 'rgba(255, 140, 15, 0.4)',
+                    borderColor: 'rgba(255, 140, 15, 1)',
+                    yAxisID: 'yAxis1',
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Pre- and Post-Campaign Sales by Brand: Exposed and UnExposed Buying Households',
+                    fontSize: 18
+                },
+                scales: {
+                    xAxes: [{
+                        barPercentage: 1, //make bars of same group closer
+                        categoryPercentage: 0.5, //increase distance between bars from different groups
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Product ID'
+                        }
+                    }],
+                    yAxes: [{
+                        id: 'yAxis1',
+                        type: 'linear',
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Sales ($)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value, index, values) {
+                                if (parseInt(value) >= 1000) {
+                                    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                } else {
+                                    return value;
+                                }
+                            }
+                        }
+                    }]
+                },
+                annotation: {
+                    annotations: [{
+                        drawTime: 'beforeDatasetsDraw',
+                        type: 'box',
+                        xScaleID: 'x-axis-0',
+                        yScaleID: 'y-axis-0',
+                        xMin: trgt_brand_name_p1_t2, //NEED TO PASS NAME OF TARGET BRAND PRODUCT!!!
+                        xMax: trgt_brand_name_p1_t2, //NEED TO PASS NAME OF TARGET BRAND PRODUCT!!!
+                        backgroundColor: 'rgba(101, 33, 171, 0.2)',
+                        borderColor: 'rgba(101, 33, 171, 0.3)',
+                        borderWidth: 70,
+                        onClick: function(e) {
+                            console.log('Box', e.type, this);
+                        }
+                    }]
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        });
+
+        /* Page 1 Tab 3 Chart: Fair Share */
+        var data_p1_t3_a = []; // These figures are obtained multiplying by 100 the ones in the csv file!
+        var data_p1_t3_b = [];
+        var lbl_p1_t3 = [];
+
+        var ctx_Page1_Tab3 = document.getElementById('Page1_Tab3_Chart').getContext('2d');
+        var Page1_Tab3_Chart = new Chart(ctx_Page1_Tab3, {
+            type: 'bar',
+
+            data: {
+                labels: lbl_p1_t3,
+
+                datasets: [{
+                    label: 'Contribution to Target Brand',
+                    data: data_p1_t3_a,
+                    backgroundColor: 'rgba(0, 140, 255, 1)',
+                    borderColor: 'rgba(0, 140, 255, 1)',
+                    yAxisID: 'yAxis1',
+                    order: 2,
+                }, {
+                    label: 'Fair Share Index',
+                    data: data_p1_t3_b,
+                    backgroundColor: 'rgba(247, 202, 24, 1)',
+                    borderColor: 'rgba(247, 202, 24, 1)',
+                    order: 1,
+                    yAxisID: 'yAxis2',
+                    type: 'line',
+                    fill: false,
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Fair Share Index and Contribution to Target Brand Change in Sales',
+                    fontSize: 18
+                },
+                scales: {
+                    yAxes: [{
+                        id: 'yAxis1',
+                        type: 'linear',
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Target Brand Growth Contribution (%)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value) {
+                                return value + '%'; // add percent symbol
+                            }
+                        }
+                    }, {
+                        id: 'yAxis2',
+                        type: 'linear',
+                        position: 'right',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Fair Share Index (%)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value) {
+                                return value + '%'; // add percent symbol
+                            }
+                        },
+                        gridLines: {
+                            display: false
+                        }
+                    }]
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        });
+
+        /* Page 1 Tab 4 Chart: Growth Contribution by UPC */
+        var data_p1_t4_a = []; // These figures are obtained multiplying by 100 the ones in the csv file!
+        var data_p1_t4_b = []; // These figures are obtained multiplying by 100 the ones in the csv file!
+        var data_p1_t4_c = []; // These figures are obtained multiplying by 100 the ones in the csv file!
+        var lbl_p1_t4 = [];
+
+        var ctx_Page1_Tab4 = document.getElementById('Page1_Tab4_Chart').getContext('2d');
+        var Page1_Tab4_Chart = new Chart(ctx_Page1_Tab4, {
+            type: 'bar',
+
+            data: {
+                labels: lbl_p1_t4,
+                datasets: [{
+                    label: 'Sales Pre-Campaign',
+                    data: data_p1_t4_a,
+                    backgroundColor: 'rgba(0, 140, 255, 1)',
+                    borderColor: 'rgba(0, 140, 255, 1)',
+                    yAxisID: 'yAxis1',
+                    order: 2,
+                }, {
+                    label: 'Sales Post-Campaign',
+                    data: data_p1_t4_b,
+                    backgroundColor: 'rgba(255, 140, 15, 1)',
+                    borderColor: 'rgba(255, 140, 15, 1)',
+                    yAxisID: 'yAxis1',
+                    order: 2,
+                }, {
+                    label: 'Target Brand\'s Sales Growth Contribution',
+                    data: data_p1_t4_c,
+                    backgroundColor: 'rgba(247, 202, 24, 1)',
+                    borderColor: 'rgba(247, 202, 24, 1)',
+                    yAxisID: 'yAxis2',
+                    fill: false,
+                    order: 1,
+                    type: 'line',
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Sales and Growth Contribution by UPC',
+                    fontSize: 18
+                },
+                scales: {
+                    xAxes: [{
+                        barPercentage: 1, //make bars of same group closer
+                        categoryPercentage: 0.5, //increase distance between bars from different groups
+                        display: false,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'UPC Description'
+                        },
+                        ticks: {
+                            display: false
+                        }
+                    }],
+                    yAxes: [{
+                        id: 'yAxis1',
+                        type: 'linear',
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Sales (%)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value) {
+                                return value + '%'; // add percent symbol
+                            }
+                        }
+                    }, {
+                        id: 'yAxis2',
+                        type: 'linear',
+                        position: 'right',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Growth Contribution (%)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value) {
+                                return value + '%'; // add percent symbol
+                            }
+                        },
+                        gridLines: {
+                            display: false
+                        }
+                    }]
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        });
+
+        /* Page 2 Tab 1 Chart: Exposed Buyer Type */
+        var data_p2_t1_a = []; // All figures of this chart multiply by 100 those in dataframe
+        var data_p2_t1_b = []; // Calculate the complement to 100 of the first 2 values
+        var data_p2_t1_c = []; // Calculate the complement to 100 of the first 2 values
+        var lbl_p2_t1_a = [];
+        var lbl_p2_t1_b = [];
+        var lbl_p2_t1_c = [];
+
+        var config = {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: data_p2_t1_c,
+                    backgroundColor: ['rgba(0, 177, 106, 1)', 'rgba(217, 30, 24, 1)', 'rgba(255, 255, 255, 1)'],
+                    label: 'New Buyers',
+                    labels: lbl_p2_t1_c
+                }, {
+                    data: data_p2_t1_b,
+                    backgroundColor: ['rgba(247, 202, 24, 1)', 'rgba(145, 61, 136, 1)', 'rgba(255, 255, 255, 1)'],
+                    label: 'Brand Buyers',
+                    labels: lbl_p2_t1_b
+                }, {
+                    data: data_p2_t1_a,
+                    backgroundColor: ['rgba(255, 140, 15, 1)', 'rgba(0, 140, 255, 1)', 'rgba(219, 10, 91, 1)'],
+                    label: 'Buyers Types',
+                    labels: lbl_p2_t1_a
+                }],
+                labels: lbl_p2_t1_c.concat(lbl_p2_t1_b, lbl_p2_t1_a)
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Buyer Types: Exposed Households',
+                    fontSize: 18
+                },
+                rotation: -0.8 * Math.PI,
+                legend: {
+                    position: 'left',
+                    labels: {
+                        generateLabels: () => {
+                            let labels = [];
+                            config.data.datasets.forEach((ds, iDs) => labels = labels.concat(ds.labels.map((l, iLabel) => ({
+                                datasetIndex: iDs,
+                                labelIndex: iLabel,
+                                text: l,
+                                fillStyle: ds.backgroundColor[iLabel],
+                                hidden: chart ? chart.getDatasetMeta(iDs).data[iLabel].hidden : false,
+                                strokeStyle: 'rgba(255, 255, 255, 1)'
+                            }))));
+                            return labels;
+                        }
+                    },
+                    onClick: (event, legendItem) => {
+                        let metaData = chart.getDatasetMeta(legendItem.datasetIndex).data;
+                        metaData[legendItem.labelIndex].hidden = !metaData[legendItem.labelIndex].hidden;
+                        chart.update();
+                    }
+                },
+                tooltips: {
+                    callbacks: {
+                        label: (tooltipItem, data) => {
+                            let dataset = data.datasets[tooltipItem.datasetIndex];
+                            let index = tooltipItem.index;
+                            return dataset.labels[index] + ": " + dataset.data[index];
+                        }
+                    }
+                }
+            }
+        };
+
+        var chart = new Chart('Page2_Tab1_Chart', config);
+
+        /* Page 2 Tab 2 Chart: UnExposed Buyer Type */
+        var data_p2_t2_a = []; // All figures of this chart multiply by 100 those in dataframe
+        var data_p2_t2_b = []; // Calculate the complement to 100 of the first 2 values
+        var data_p2_t2_c = []; // Calculate the complement to 100 of the first 2 values
+        var lbl_p2_t2_a = [];
+        var lbl_p2_t2_b = [];
+        var lbl_p2_t2_c = [];
+
+        var config = {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: data_p2_t2_c,
+                    backgroundColor: ['rgba(0, 177, 106, 1)', 'rgba(217, 30, 24, 1)', 'rgba(255, 255, 255, 1)'],
+                    label: 'New Buyers',
+                    labels: lbl_p2_t2_c
+                }, {
+                    data: data_p2_t2_b,
+                    backgroundColor: ['rgba(247, 202, 24, 1)', 'rgba(145, 61, 136, 1)', 'rgba(255, 255, 255, 1)'],
+                    label: 'Brand Buyers',
+                    labels: lbl_p2_t2_b
+                }, {
+                    data: data_p2_t2_a,
+                    backgroundColor: ['rgba(255, 140, 15, 1)', 'rgba(0, 140, 255, 1)', 'rgba(219, 10, 91, 1)'],
+                    label: 'Buyers Types',
+                    labels: lbl_p2_t2_a
+                }],
+                labels: lbl_p2_t2_c.concat(lbl_p2_t2_b, lbl_p2_t2_a)
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Buyer Types: UnExposed Households',
+                    fontSize: 18
+                },
+                rotation: -0.8 * Math.PI,
+                legend: {
+                    position: 'left',
+                    labels: {
+                        generateLabels: () => {
+                            let labels = [];
+                            config.data.datasets.forEach((ds, iDs) => labels = labels.concat(ds.labels.map((l, iLabel) => ({
+                                datasetIndex: iDs,
+                                labelIndex: iLabel,
+                                text: l,
+                                fillStyle: ds.backgroundColor[iLabel],
+                                hidden: chart ? chart.getDatasetMeta(iDs).data[iLabel].hidden : false,
+                                strokeStyle: 'rgba(255, 255, 255, 1)'
+                            }))));
+                            return labels;
+                        }
+                    },
+                    onClick: (event, legendItem) => {
+                        let metaData = chart.getDatasetMeta(legendItem.datasetIndex).data;
+                        metaData[legendItem.labelIndex].hidden = !metaData[legendItem.labelIndex].hidden;
+                        chart.update();
+                    }
+                },
+                tooltips: {
+                    callbacks: {
+                        label: (tooltipItem, data) => {
+                            let dataset = data.datasets[tooltipItem.datasetIndex];
+                            let index = tooltipItem.index;
+                            return dataset.labels[index] + ": " + dataset.data[index];
+                        }
+                    }
+                }
+            }
+        };
+
+        var chart = new Chart('Page2_Tab2_Chart', config);
+
+        /* Page 2 Tab 3 Chart: Impressions Distribution */
+        var data_p2_t3_a = [];
+        var data_p2_t3_b = [];
+        var data_p2_t3_c = [];
+        var data_p2_t3_d = [];
+        var lbl_p2_t3 = [];
+
+        var ctx_Page2_Tab3 = document.getElementById('Page2_Tab3_Chart').getContext('2d');
+        var Page2_Tab3_Chart = new Chart(ctx_Page2_Tab3, {
+            type: 'bar',
+
+            data: {
+                labels: lbl_p2_t3,
+                datasets: [{
+                    label: 'LAPSED BUYERS',
+                    data: data_p2_t3_a,
+                    backgroundColor: 'rgba(21, 199, 87, 0.2)',
+                    borderColor: 'rgba(21, 199, 87, 1)',
+                    yAxisID: 'yAxis1',
+                    fill: false,
+                    order: 1,
+                    type: 'line',
+                    datalabels: {
+                        display: false
+                    }
+                }, {
+                    label: 'BRAND SWITCH BUYERS',
+                    data: data_p2_t3_b,
+                    backgroundColor: 'rgba(145, 61, 136, 0.1)',
+                    borderColor: 'rgba(145, 61, 136, 1)',
+                    yAxisID: 'yAxis1',
+                    fill: false,
+                    order: 1,
+                    type: 'line',
+                    datalabels: {
+                        display: false
+                    }
+                }, {
+                    label: 'BRAND BUYERS',
+                    data: data_p2_t3_c,
+                    backgroundColor: 'rgba(247, 202, 24, 1)',
+                    borderColor: 'rgba(247, 202, 24, 1)',
+                    yAxisID: 'yAxis1',
+                    fill: false,
+                    order: 1,
+                    type: 'line',
+                    datalabels: {
+                        display: false
+                    }
+                }, {
+                    label: 'CATEGORY BUYERS',
+                    data: data_p2_t3_d,
+                    backgroundColor: 'rgba(0, 140, 255, 1)',
+                    borderColor: 'rgba(0, 140, 255, 1)',
+                    yAxisID: 'yAxis2',
+                    order: 2,
+                }]
+            },
+
+            plugins: [ChartDataLabels],
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Distribution of Impressions per Buyer Type over Campaign Period',
+                    fontSize: 18
+                },
+                plugins: {
+                    datalabels: {
+                        display: true,
+                        align: 'start',
+                        anchor: 'center',
+                        color: '#000000',
+                        formatter: function(value, ctx) {
+                            if (parseInt(value) >= 1000) {
+                                return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                            } else {
+                                return value;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        barPercentage: 1, //make bars of same group closer
+                        categoryPercentage: 0.5, //increase distance between bars from different groups
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Week'
+                        }
+                    }],
+                    yAxes: [{
+                        id: 'yAxis1',
+                        type: 'linear',
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Frequency (# of Impressions)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value, index, values) {
+                                if (parseInt(value) >= 1000) {
+                                    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                } else {
+                                    return value;
+                                }
+                            }
+                        }
+                    }, {
+                        id: 'yAxis2',
+                        type: 'linear',
+                        position: 'right',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Frequency (# of Impressions)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value, index, values) {
+                                if (parseInt(value) >= 1000) {
+                                    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                } else {
+                                    return value;
+                                }
+                            }
+                        },
+                        gridLines: {
+                            display: false
+                        }
+                    }]
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        });
+
+        /* Page 2 Tab 4 Chart: Impressions Cumulative Distribution */
+        var data_p2_t4_a = [];
+        var data_p2_t4_b = [];
+        var data_p2_t4_c = [];
+        var data_p2_t4_d = [];
+        var lbl_p2_t4 = [];
+
+        var ctx_Page2_Tab4 = document.getElementById('Page2_Tab4_Chart').getContext('2d');
+        var Page2_Tab4_Chart = new Chart(ctx_Page2_Tab4, {
+            type: 'bar',
+
+            data: {
+                labels: lbl_p2_t4,
+                datasets: [{
+                    label: 'LAPSED BUYERS',
+                    data: data_p2_t4_a,
+                    backgroundColor: 'rgba(0, 140, 255, 1)',
+                    borderColor: 'rgba(0, 140, 255, 1)',
+                }, {
+                    label: 'BRAND SWITCH BUYERS',
+                    data: data_p2_t4_b,
+                    backgroundColor: 'rgba(255, 140, 15, 1)',
+                    borderColor: 'rgba(255, 140, 15, 1)',
+                }, {
+                    label: 'BRAND BUYERS',
+                    data: data_p2_t4_c,
+                    backgroundColor: 'rgba(247, 202, 24, 1)',
+                    borderColor: 'rgba(247, 202, 24, 1)',
+                }, {
+                    label: 'CATEGORY BUYERS',
+                    data: data_p2_t4_d,
+                    backgroundColor: 'rgba(145, 61, 136, 1)',
+                    borderColor: 'rgba(145, 61, 136, 1)',
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Cumulative Distribution of Impressions per Buyer Type over Campaign Period',
+                    fontSize: 18
+                },
+                scales: {
+                    xAxes: [{
+                        barPercentage: 1, //make bars of same group closer
+                        categoryPercentage: 0.5, //increase distance between bars from different groups
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Week'
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Frequency (%)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value) {
+                                return value + '%'; // add percent symbol
+                            }
+                        }
+                    }]
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        });
+
+        /* Page 3 Tab 1 Chart: Exposures by Buying HHs */
+        var data_p3_t1_a = [];
+        var data_p3_t1_b = []; // These figures are obtained multiplying by 100 the ones in the csv file!
+        var lbl_p3_t1 = [];
+
+        var ctx_Page3_Tab1 = document.getElementById('Page3_Tab1_Chart').getContext('2d');
+        var Page3_Tab1_Chart = new Chart(ctx_Page3_Tab1, {
+            type: 'bar',
+
+            data: {
+                labels: lbl_p3_t1,
+                datasets: [{
+                    label: 'Frequency (# of HHs)',
+                    data: data_p3_t1_a,
+                    yAxisID: 'yAxis1',
+                    backgroundColor: 'rgba(0, 140, 255, 1)',
+                    borderColor: 'rgba(0, 140, 255, 1)',
+                    order: 2
+                }, {
+                    label: 'Relative Frequency',
+                    data: data_p3_t1_b,
+                    yAxisID: 'yAxis2',
+                    backgroundColor: 'rgba(247, 202, 24, 1)',
+                    borderColor: 'rgba(247, 202, 24, 1)',
+                    fill: false,
+                    order: 1,
+                    type: 'line'
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Distribution of Exposures for Buying Households',
+                    fontSize: 18
+                },
+                scales: {
+                    yAxes: [{
+                        id: 'yAxis1',
+                        type: 'linear',
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Frequency (# of HHs)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value, index, values) {
+                                if (parseInt(value) >= 1000) {
+                                    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                } else {
+                                    return value;
+                                }
+                            }
+                        }
+                    }, {
+                        id: 'yAxis2',
+                        type: 'linear',
+                        position: 'right',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Relative Frequency (%)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value) {
+                                return value + '%'; // add percent symbol
+                            }
+                        },
+                        gridLines: {
+                            display: false
+                        }
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Number of Exposures'
+                        }
+                    }]
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        });
+
+        /* Page 3 Tab 2 Chart: Time Lapsed */
+        var data_p3_t2_a = [];
+        var data_p3_t2_b = [];
+        var lbl_p3_t2 = [];
+
+        var ctx_Page3_Tab2 = document.getElementById('Page3_Tab2_Chart').getContext('2d');
+        var Page3_Tab2_Chart = new Chart(ctx_Page3_Tab2, {
+            type: 'bar',
+
+            data: {
+                labels: lbl_p3_t2,
+                datasets: [{
+                    label: 'Frequency (# of HHs)',
+                    data: data_p3_t2_a,
+                    yAxisID: 'yAxis1',
+                    backgroundColor: 'rgba(0, 140, 255, 1)',
+                    borderColor: 'rgba(0, 140, 255, 1)',
+                }, {
+                    label: 'Average Number of Exposures to First Purchase',
+                    data: data_p3_t2_b,
+                    yAxisID: 'yAxis2',
+                    backgroundColor: 'rgba(255, 140, 15, 1)',
+                    borderColor: 'rgba(255, 140, 15, 1)',
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Distribution of Buying Households: Path to Purchase',
+                    fontSize: 18
+                },
+                scales: {
+                    yAxes: [{
+                        id: 'yAxis1',
+                        type: 'linear',
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Frequency (# of HHs)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value, index, values) {
+                                if (parseInt(value) >= 1000) {
+                                    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                } else {
+                                    return value;
+                                }
+                            }
+                        }
+                    }, {
+                        id: 'yAxis2',
+                        type: 'linear',
+                        position: 'right',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Number of Exposures before First Purchase'
+                        },
+                        gridLines: {
+                            display: false
+                        }
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Time Lapsed between First Purchase and Last Exposure'
+                        }
+                    }]
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        });
+
+        /* Page 3 Tab 3 Chart: Exposures Before 1st Buy */
+        var data_p3_t3_a = [];
+        var data_p3_t3_b = []; // These figures are obtained multiplying by 100 the ones in the csv file!
+        var lbl_p3_t3 = [];
+
+        var ctx_Page3_Tab3 = document.getElementById('Page3_Tab3_Chart').getContext('2d');
+        var Page3_Tab3_Chart = new Chart(ctx_Page3_Tab3, {
+            type: 'bar',
+
+            data: {
+                labels: lbl_p3_t3,
+                datasets: [{
+                    label: 'Frequency (# of HHs)',
+                    data: data_p3_t3_a,
+                    yAxisID: 'yAxis1',
+                    backgroundColor: 'rgba(0, 140, 255, 1)',
+                    borderColor: 'rgba(0, 140, 255, 1)',
+                    order: 2
+                }, {
+                    label: 'Cumulative Frequency',
+                    data: data_p3_t3_b,
+                    yAxisID: 'yAxis2',
+                    backgroundColor: 'rgba(247, 202, 24, 0.1)',
+                    borderColor: 'rgba(247, 202, 24, 1)',
+                    fill: true,
+                    order: 1,
+                    type: 'line'
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Distribution of Exposures before First Purchase',
+                    fontSize: 18
+                },
+                scales: {
+                    yAxes: [{
+                        id: 'yAxis1',
+                        type: 'linear',
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Frequency (# of HHs)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value, index, values) {
+                                if (parseInt(value) >= 1000) {
+                                    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                } else {
+                                    return value;
+                                }
+                            }
+                        }
+                    }, {
+                        id: 'yAxis2',
+                        type: 'linear',
+                        position: 'right',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Cumulative Frequency (%)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value) {
+                                return value + '%'; // add percent symbol
+                            }
+                        },
+                        gridLines: {
+                            display: false
+                        }
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Number of Exposures before First Purchase'
+                        }
+                    }]
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        });
+
+        /* Page 3 Tab 4 Chart: Impressions */
+        var data_p3_t4_a = [];
+        /* get total */
+        const reducer = (accumulator, currentValue) => accumulator + currentValue;
+        var total = data_p3_t4_a.reduce(reducer);
+        var lbl_p3_t4 = [];
+
+        var ctx_Page3_Tab4 = document.getElementById('Page3_Tab4_Chart').getContext('2d');
+        var Page3_Tab4_Chart = new Chart(ctx_Page3_Tab4, {
+            type: 'bar',
+
+            data: {
+                labels: lbl_p3_t4,
+                datasets: [{
+                    label: 'Frequency (# of HHs)',
+                    data: data_p3_t4_a,
+                    yAxisID: 'yAxis1',
+                    backgroundColor: 'rgba(0, 140, 255, 1)',
+                    borderColor: 'rgba(0, 140, 255, 1)'
+                }]
+            },
+
+            plugins: [ChartDataLabels],
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Distribution of Impressions',
+                    fontSize: 18
+                },
+                plugins: {
+                    datalabels: {
+                        display: true,
+                        align: 'end',
+                        anchor: 'end',
+                        color: '#000000',
+                        formatter: function(value, ctx) {
+                            return ((value * 100) / total).toFixed(2) + '%';
+                        }
+                    }
+                },
+                scales: {
+                    yAxes: [{
+                        id: 'yAxis1',
+                        type: 'linear',
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Frequency (# of PANIDs)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value, index, values) {
+                                if (parseInt(value) >= 1000) {
+                                    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                } else {
+                                    return value;
+                                }
+                            }
+                        }
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Number of Impressions (Capped to 10 per PANID)'
+                        }
+                    }]
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        });
+
+        /* Page 3 Tab 5 Chart: Exposures & Impressions */
+        var data_p3_t5_a = [];
+        var data_p3_t5_b = [];
+        var data_p3_t5_c = [];
+        var data_p3_t5_d = [];
+        var lbl_p3_t5 = [];
+
+        var ctx_Page3_Tab5 = document.getElementById('Page3_Tab5_Chart').getContext('2d');
+        var Page3_Tab5_Chart = new Chart(ctx_Page3_Tab5, {
+            type: 'bar',
+
+            data: {
+                labels: lbl_p3_t5,
+                datasets: [{
+                    label: 'HHs Reached',
+                    data: data_p3_t5_a,
+                    backgroundColor: 'rgba(0, 140, 255, 1)',
+                    borderColor: 'rgba(0, 140, 255, 1)',
+                    yAxisID: 'yAxis1',
+                    order: 2,
+                }, {
+                    label: 'Impressions Served',
+                    data: data_p3_t5_b,
+                    backgroundColor: 'rgba(255, 140, 15, 1)',
+                    borderColor: 'rgba(255, 140, 15, 1)',
+                    yAxisID: 'yAxis1',
+                    order: 2,
+                }, {
+                    label: 'Cumulative Impressions Served',
+                    data: data_p3_t5_c,
+                    backgroundColor: 'rgba(247, 202, 24, 0.2)',
+                    borderColor: 'rgba(247, 202, 24, 1)',
+                    yAxisID: 'yAxis2',
+                    fill: true,
+                    order: 1,
+                    type: 'line',
+                    pointStyle: 'triangle',
+                    pointRadius: 5,
+                }, {
+                    label: 'Cumulative Impressions Served for Exposure Level',
+                    data: data_p3_t5_d,
+                    backgroundColor: 'rgba(145, 61, 136, 0.1)',
+                    borderColor: 'rgba(145, 61, 136, 1)',
+                    yAxisID: 'yAxis2',
+                    fill: true,
+                    order: 1,
+                    type: 'line',
+                    pointStyle: 'rect',
+                    pointRadius: 5,
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Distributions of Exposures and Impressions',
+                    fontSize: 18
+                },
+                scales: {
+                    xAxes: [{
+                        barPercentage: 1, //make bars of same group closer
+                        categoryPercentage: 0.5, //increase distance between bars from different groups
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Number of Exposures'
+                        }
+                    }],
+                    yAxes: [{
+                        id: 'yAxis1',
+                        type: 'linear',
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Frequency (# of HHs / # of Impressions)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value, index, values) {
+                                if (parseInt(value) >= 1000) {
+                                    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                } else {
+                                    return value;
+                                }
+                            }
+                        }
+                    }, {
+                        id: 'yAxis2',
+                        type: 'linear',
+                        position: 'right',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Cumulative Frequency (Impressions / Impressions per Exposure)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value, index, values) {
+                                if (parseInt(value) >= 1000) {
+                                    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                } else {
+                                    return value;
+                                }
+                            }
+                        },
+                        gridLines: {
+                            display: false
+                        }
+                    }]
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        });
+
+        /* Page 4 Tab 1 Chart: Proscore */
+        var data_p4_t1_a = []; // These figures are obtained multiplying by 100 the ones in the csv file!
+        var data_p4_t1_b = []; // These figures are obtained multiplying by 100 the ones in the csv file!
+        var lbl_p4_t1 = [];
+
+        var ctx_Page4_Tab1 = document.getElementById('Page4_Tab1_Chart').getContext('2d');
+        var Page4_Tab1_Chart = new Chart(ctx_Page4_Tab1, {
+            type: 'bar',
+
+            data: {
+                labels: lbl_p4_t1,
+                datasets: [{
+                    label: 'Control',
+                    data: data_p4_t1_a,
+                    backgroundColor: 'rgba(0, 140, 255, 1)',
+                    borderColor: 'rgba(0, 140, 255, 1)',
+                }, {
+                    label: 'Exposed',
+                    data: data_p4_t1_b,
+                    backgroundColor: 'rgba(255, 140, 15, 1)',
+                    borderColor: 'rgba(255, 140, 15, 1)',
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Distribution of Proscore',
+                    fontSize: 18
+                },
+                scales: {
+                    yAxes: [{
+                        type: 'linear',
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Relative Frequency (%)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value) {
+                                return value + '%'; // add percent symbol
+                            }
+                        }
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Proscore value'
+                        }
+                    }]
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        });
+
+        /* Page 4 Tab 2 Chart: Retailer */
+        var data_p4_t2_a = []; // These figures are obtained multiplying by 100 the ones in the csv file!
+        var data_p4_t2_b = []; // These figures are obtained multiplying by 100 the ones in the csv file!
+        var lbl_p4_t2 = [];
+
+        var ctx_Page4_Tab2 = document.getElementById('Page4_Tab2_Chart').getContext('2d');
+        var Page4_Tab2_Chart = new Chart(ctx_Page4_Tab2, {
+            type: 'bar',
+
+            data: {
+                labels: lbl_p4_t2,
+                datasets: [{
+                    label: 'Control',
+                    data: data_p4_t2_a,
+                    backgroundColor: 'rgba(0, 140, 255, 1)',
+                    borderColor: 'rgba(0, 140, 255, 1)',
+                }, {
+                    label: 'Exposed',
+                    data: data_p4_t2_b,
+                    backgroundColor: 'rgba(255, 140, 15, 1)',
+                    borderColor: 'rgba(255, 140, 15, 1)',
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Distribution of Retailer',
+                    fontSize: 18
+                },
+                scales: {
+                    yAxes: [{
+                        type: 'linear',
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Relative Frequency (%)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value) {
+                                return value + '%'; // add percent symbol
+                            }
+                        }
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Retailer value'
+                        }
+                    }]
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        });
+
+        /* Page 4 Tab 3 Chart: DolOcc/Target Brand Buyers */
+        var data_p4_t3_a = [];
+        var data_p4_t3_b = [];
+        var data_p4_t3_c = [];
+        var data_p4_t3_d = [];
+        var lbl_p4_t3 = [];
+
+        var ctx_Page4_Tab3 = document.getElementById('Page4_Tab3_Chart').getContext('2d');
+        var Page4_Tab3_Chart = new Chart(ctx_Page4_Tab3, {
+            type: 'bar',
+
+            data: {
+                labels: lbl_p4_t3,
+                datasets: [{
+                    label: 'Exposed Pre-Campaign',
+                    data: data_p4_t3_a,
+                    backgroundColor: 'rgba(0, 140, 255, 1)',
+                    borderColor: 'rgba(0, 140, 255, 1)',
+                }, {
+                    label: 'UnExposed Pre-Campaign',
+                    data: data_p4_t3_b,
+                    backgroundColor: 'rgba(255, 140, 15, 1)',
+                    borderColor: 'rgba(255, 140, 15, 1)',
+                }, {
+                    label: 'Exposed Post-Campaign',
+                    data: data_p4_t3_c,
+                    backgroundColor: 'rgba(247, 202, 24, 1)',
+                    borderColor: 'rgba(247, 202, 24, 1)',
+                }, {
+                    label: 'UnExposed Post-Campaign',
+                    data: data_p4_t3_d,
+                    backgroundColor: 'rgba(145, 61, 136, 1)',
+                    borderColor: 'rgba(145, 61, 136, 1)',
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Distribution of Dollars-per-Occasion for Target Brand Buyers',
+                    fontSize: 18
+                },
+                scales: {
+                    xAxes: [{
+                        barPercentage: 1, //make bars of same group closer
+                        categoryPercentage: 0.5, //increase distance between bars from different groups
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Bin'
+                        },
+                        ticks: {
+                            display: true,
+                        }
+                    }],
+                    yAxes: [{
+                        type: 'linear',
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Frequency (# of HHs)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value, index, values) {
+                                if (parseInt(value) >= 1000) {
+                                    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ", ");
+                                } else {
+                                    return value;
+                                }
+                            }
+                        }
+                    }]
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        });
+
+        /* Page 4 Tab 4 Chart: DolOcc/Category Buyers */
+        var data_p4_t4_a = [];
+        var data_p4_t4_b = [];
+        var data_p4_t4_c = [];
+        var data_p4_t4_d = [];
+        var lbl_p4_t4 = [];
+
+        var ctx_Page4_Tab4 = document.getElementById('Page4_Tab4_Chart').getContext('2d');
+        var Page4_Tab4_Chart = new Chart(ctx_Page4_Tab4, {
+            type: 'bar',
+
+            data: {
+                labels: lbl_p4_t4,
+                datasets: [{
+                    label: 'Exposed Pre-Campaign',
+                    data: data_p4_t4_a,
+                    backgroundColor: 'rgba(0, 140, 255, 1)',
+                    borderColor: 'rgba(0, 140, 255, 1)',
+                }, {
+                    label: 'UnExposed Pre-Campaign',
+                    data: data_p4_t4_b,
+                    backgroundColor: 'rgba(255, 140, 15, 1)',
+                    borderColor: 'rgba(255, 140, 15, 1)',
+                }, {
+                    label: 'Exposed Post-Campaign',
+                    data: data_p4_t4_c,
+                    backgroundColor: 'rgba(247, 202, 24, 1)',
+                    borderColor: 'rgba(247, 202, 24, 1)',
+                }, {
+                    label: 'UnExposed Post-Campaign',
+                    data: data_p4_t4_d,
+                    backgroundColor: 'rgba(145, 61, 136, 1)',
+                    borderColor: 'rgba(145, 61, 136, 1)',
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Distribution of Dollars-per-Occasion for Category Buyers',
+                    fontSize: 18
+                },
+                scales: {
+                    xAxes: [{
+                        barPercentage: 1, //make bars of same group closer
+                        categoryPercentage: 0.5, //increase distance between bars from different groups
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Bin'
+                        },
+                        ticks: {
+                            display: true,
+                        }
+                    }],
+                    yAxes: [{
+                        type: 'linear',
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Frequency (# of HHs)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value, index, values) {
+                                if (parseInt(value) >= 1000) {
+                                    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ", ");
+                                } else {
+                                    return value;
+                                }
+                            }
+                        }
+                    }]
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        });
+
+        /* Page 5 Tab 1 Chart: Penetration */
+        var data_p5_t1_a = []; // These figures are obtained multiplying by 100 the ones in the csv file!
+        var data_p5_t1_b = []; // These figures are obtained multiplying by 100 the ones in the csv file!
+        var data_p5_t1_c = []; // These figures are obtained multiplying by 100 the ones in the csv file!
+        var data_p5_t1_d = []; // These figures are obtained multiplying by 100 the ones in the csv file!
+        var lbl_p5_t1 = [];
+
+        var ctx_Page5_Tab1 = document.getElementById('Page5_Tab1_Chart').getContext('2d');
+        var Page5_Tab1_Chart = new Chart(ctx_Page5_Tab1, {
+            type: 'bar',
+
+            data: {
+                labels: lbl_p5_t1,
+                datasets: [{
+                    label: 'Exp (Raw)',
+                    data: data_p5_t1_a,
+                    backgroundColor: 'rgba(0, 140, 255, 1)',
+                    borderColor: 'rgba(0, 140, 255, 1)',
+                }, {
+                    label: 'NExp (Raw)',
+                    data: data_p5_t1_b,
+                    backgroundColor: 'rgba(255, 140, 15, 1)',
+                    borderColor: 'rgba(255, 140, 15, 1)',
+                }, {
+                    label: 'Exp (Matched)',
+                    data: data_p5_t1_c,
+                    backgroundColor: 'rgba(247, 202, 24, 1)',
+                    borderColor: 'rgba(247, 202, 24, 1)',
+                }, {
+                    label: 'NExp (Matched)',
+                    data: data_p5_t1_d,
+                    backgroundColor: 'rgba(145, 61, 136, 1)',
+                    borderColor: 'rgba(145, 61, 136, 1)',
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Proportion of Buyers',
+                    fontSize: 18
+                },
+                scales: {
+                    yAxes: [{
+                        type: 'linear',
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Proportion (%)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value) {
+                                return value + '%'; // add percent symbol
+                            }
+                        }
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            display: false,
+                        }
+                    }]
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        });
+
+        /* Page 5 Tab 2 Chart: Occasions */
+        var data_p5_t2_a = [];
+        var data_p5_t2_b = [];
+        var data_p5_t2_c = [];
+        var data_p5_t2_d = [];
+        var lbl_p5_t2 = [];
+
+        var ctx_Page5_Tab2 = document.getElementById('Page5_Tab2_Chart').getContext('2d');
+        var Page5_Tab2_Chart = new Chart(ctx_Page5_Tab2, {
+            type: 'bar',
+
+            data: {
+                labels: lbl_p5_t2,
+                datasets: [{
+                    label: 'Exp (Raw)',
+                    data: data_p5_t2_a,
+                    backgroundColor: 'rgba(0, 140, 255, 1)',
+                    borderColor: 'rgba(0, 140, 255, 1)',
+                }, {
+                    label: 'NExp (Raw)',
+                    data: data_p5_t2_b,
+                    backgroundColor: 'rgba(255, 140, 15, 1)',
+                    borderColor: 'rgba(255, 140, 15, 1)',
+                }, {
+                    label: 'Exp (Matched)',
+                    data: data_p5_t2_c,
+                    backgroundColor: 'rgba(247, 202, 24, 1)',
+                    borderColor: 'rgba(247, 202, 24, 1)',
+                }, {
+                    label: 'NExp (Matched)',
+                    data: data_p5_t2_d,
+                    backgroundColor: 'rgba(145, 61, 136, 1)',
+                    borderColor: 'rgba(145, 61, 136, 1)',
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Average Occasions per Buying Household',
+                    fontSize: 18
+                },
+                scales: {
+                    yAxes: [{
+                        type: 'linear',
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Average Occasions'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                        }
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            display: false,
+                        }
+                    }]
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        });
+
+        /* Page 5 Tab 3 Chart: Dollars-per-Occasion */
+        var data_p5_t3_a = [];
+        var data_p5_t3_b = [];
+        var data_p5_t3_c = [];
+        var data_p5_t3_d = [];
+        var lbl_p5_t3 = [];
+
+        var ctx_Page5_Tab3 = document.getElementById('Page5_Tab3_Chart').getContext('2d');
+        var Page5_Tab3_Chart = new Chart(ctx_Page5_Tab3, {
+            type: 'bar',
+
+            data: {
+                labels: lbl_p5_t3,
+                datasets: [{
+                    label: 'Exp (Raw)',
+                    data: data_p5_t3_a,
+                    backgroundColor: 'rgba(0, 140, 255, 1)',
+                    borderColor: 'rgba(0, 140, 255, 1)',
+                }, {
+                    label: 'NExp (Raw)',
+                    data: data_p5_t3_b,
+                    backgroundColor: 'rgba(255, 140, 15, 1)',
+                    borderColor: 'rgba(255, 140, 15, 1)',
+                }, {
+                    label: 'Exp (Matched)',
+                    data: data_p5_t3_c,
+                    backgroundColor: 'rgba(247, 202, 24, 1)',
+                    borderColor: 'rgba(247, 202, 24, 1)',
+                }, {
+                    label: 'NExp (Matched)',
+                    data: data_p5_t3_d,
+                    backgroundColor: 'rgba(145, 61, 136, 1)',
+                    borderColor: 'rgba(145, 61, 136, 1)',
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                title: {
+                    display: true,
+                    text: 'Average Dollars-per-Occasion per Buying Household',
+                    fontSize: 18
+                },
+                scales: {
+                    yAxes: [{
+                        type: 'linear',
+                        position: 'left',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Average Dollars-per-Occasion ($)'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value, index, values) {
+                                if (parseInt(value) >= 1000) {
+                                    return '$' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ", ");
+                                } else {
+                                    return '$' + value;
+                                }
+                            }
+                        }
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            display: false,
+                        }
+                    }]
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
