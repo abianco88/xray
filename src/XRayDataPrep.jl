@@ -37,7 +37,7 @@ function common_load_input()
 end
 
 # CDMA data prep
-function cdma_load_input()
+function cdma_load_input(scored_file::String="./scored.csv")
     # Load CDMA specific input files
     brand_data = CSV.read("./CDMA/brand_data.csv", DataFrame);
     buyer_week_data = CSV.read("./CDMA/buyer_week_data.csv", DataFrame);
@@ -46,7 +46,7 @@ function cdma_load_input()
     upc_data = CSV.read("./CDMA/upc_data.csv", DataFrame);
 
     # Load `scored.csv` and read the 2 values needed for the adjustments
-    scored = CSV.read("./scored.csv", DataFrame);
+    scored = CSV.read(scored_file, DataFrame);
     udj_avg_expsd_pst = scored[(scored[:MODEL_DESC] .== "Total Campaign") .& (scored[:dependent_variable] .== "pen"), :UDJ_AVG_EXPSD_HH_PST][1];
     udj_avg_cntrl_pst = scored[(scored[:MODEL_DESC] .== "Total Campaign") .& (scored[:dependent_variable] .== "pen"), :UDJ_AVG_CNTRL_HH_PST][1];
 
