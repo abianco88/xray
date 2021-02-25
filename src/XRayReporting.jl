@@ -1196,7 +1196,7 @@ function viz_out_prep(dfd_fr_shr_ndx::DataFrame, exposed_net::DataFrame, control
 end
 
 # Module signature function --- REQUIRES: XRayDataPrep
-function viz_RUN(template_dir::String, template_file::String, out_dir::String, out_file_name::String)
+function viz_RUN(template_file::String=Sys.BINDIR*"/rep/XRayVisualizationUI.html", out_file::String="./rep.html")
     print("\n-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n")
     print("\n\t\t\t~~~XRay Visualization Tool~~~\n")
     println("********************************************************************************")
@@ -1234,11 +1234,11 @@ function viz_RUN(template_dir::String, template_file::String, out_dir::String, o
     data, label, extra = viz_out_prep(dfd_fr_shr_ndx, exposed_net, control_net, dfd_upc_grwth_cnt, dfo_Exp, dfo_UnExp, exposed_buyer_by_week, cumulative_by_week, Byr_Frq_Dgtl, Tm_1st_by_lst_xpsur_Dgtl, Frst_Buy_Frq_Dgtl_std, Tot_Frq_Dgtl, dfd_Cum_IMP, df_proscore_dist, df_retailer_dist, df_dolocc_bins, df_raw_metrics, df_matched_metrics);
 
     # Load web page template, insert the relevant data and labels, and save the final HTML file to disk
-    htmldoc = read(template_dir*"/"*template_file, String);
+    htmldoc = read(template_file, String);
     htmldoc = viz_write(htmldoc, data, label; extra = extra);
-    write(out_dir*"/"*out_file_name*".html", htmldoc);
+    write(out_file, htmldoc);
 
-    print("\n\nGenerated HTML VISUALIZATION TOOL and saved to\n"*out_dir*"\nas "*out_file_name*".html\n")
+    print("\n\nGenerated HTML VISUALIZATION TOOL and saved to\n\nas "*out_file*".html\n")
     print("\n\n\n\t---> STEP 3 completed!\n\n")
     print("-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n")
     println("")
