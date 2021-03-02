@@ -164,7 +164,7 @@ function fairshare(df_cdma_dump::DataFrame, brand_data::DataFrame)
     df_agg = DataFrames.innerjoin(df_val, df_pct, on = :id);
     df_agg[:fair_share_index] = df_agg[:pct_of_targetbrand]./(df_agg[:pre_sales]/sum(df_agg[df_agg[:id] .!= 1, :pre_sales]))*100;
     df_agg[df_agg[:id] .== 1, [:pct_of_targetbrand, :fair_share_index]] = 0.0;
-    df_agg = df_agg[(df_agg[:pre_sales] .!= 0) .& (df_agg[:pos_sales] .!= 0), :];
+    df_agg = df_agg[(df_agg[:id] .== 1) .| (df_agg[:pre_sales] .!= 0) .& (df_agg[:pos_sales] .!= 0), :];    # Fix to keep TARGET BRAND even if no pre sales
     agg_fair_share_index = DataFrames.leftjoin(df_agg, brand_data2, on = :id);
     ordered_cols = [:id, :product, :pos_sales, :pos_sales_pct, :pre_sales, :pre_sales_pct, :pct_change, :pct_of_targetbrand, :fair_share_index];
     agg_fair_share_index = agg_fair_share_index[ordered_cols];
@@ -1166,7 +1166,12 @@ function viz_out_prep(dfd_fr_shr_ndx::DataFrame, exposed_net::DataFrame, control
     d1, l1, e1 = viz_product_sales(dfd_fr_shr_ndx);
     d2, l2, e2 = viz_brand_names_sales(exposed_net, control_net);
     d3, l3 = viz_contribution_to_target_brand_change_in_sales(dfd_fr_shr_ndx);
-    d4, l4 = viz_upcs_pos_contrib_to_sale_change(dfd_upc_grwth_cnt);
+    if !isempty(dfd_upc_grwth_cnt)
+        d4, l4 = viz_upcs_pos_contrib_to_sale_change(dfd_upc_grwth_cnt);
+    else
+        d4 = DataFrame();
+        l4 = DataFrame();
+    end
     # Page 2 charts
     d5, l5 = viz_buyer_class_exp(dfo_Exp);
     d6, l6 = viz_buyer_class_unexp(dfo_UnExp);
@@ -1196,15 +1201,15 @@ function viz_out_prep(dfd_fr_shr_ndx::DataFrame, exposed_net::DataFrame, control
 end
 
 # Module signature function --- REQUIRES: XRayDataPrep
-function viz_RUN(template_dir::String, template_file::String, out_dir::String, out_file_name::String)
+function viz_RUN(scored_file::String="./scored.csv", dump_file::String="./dump.csv", template_file::String=Sys.BINDIR*"/rep/XRayVisualizationUI.html", out_file::String="./rep.html", hasPRE::Bool=true)
     print("\n-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n")
     print("\n\t\t\t~~~XRay Visualization Tool~~~\n")
     println("********************************************************************************")
     println("STEP 1: Data Prep")
     println("********************************************************************************")
     # Generate inputs from XRayDataPrep
-    descDump, df_desc, brand_data, hhcounts_date, upc_data, udj_avg_expsd_pst, udj_avg_cntrl_pst, df_cdma_dump, df_upcs_mx, combined, freq_index, expocnt, imp_week = viz_dataprep();
-    print("\n\n\n\t---> STEP 1 completed!\n\n\n")
+    descDump, df_desc, brand_data, hhcounts_date, upc_data, udj_avg_expsd_pst, udj_avg_cntrl_pst, df_cdma_dump, df_upcs_mx, combined, freq_index, expocnt, imp_week = viz_dataprep(scored_file, dump_file);
+    print("\n\n\n\t---> STEP 1 completed!\n\n\n\n")
 
     println("********************************************************************************")
     println("STEP 2: Generate Reports")
@@ -1212,7 +1217,15 @@ function viz_RUN(template_dir::String, template_file::String, out_dir::String, o
     # Generate report data frames to be shown in the visualization tool
     dfd_fr_shr_ndx = fairshare(df_cdma_dump, brand_data);
     exposed_net, control_net = brand_dist(df_upcs_mx);
-    dfd_upc_grwth_cnt = upc_growth(df_cdma_dump, upc_data);
+    if hasPRE == true
+        dfd_upc_grwth_cnt = upc_growth(df_cdma_dump, upc_data);
+    else
+        print("\n\n\n\t!!! WARNING: Report \"UPC Growth\" won't be produced because input")
+        print("    \n\t             file `upc_data.csv` contains only post-campaign data.")
+        print("    \n\t!!! WARNING: Other reports may be incorrect/misleading because")
+        print("    \n\t             pre-campaign data may be incorrect/unreliable.")
+        dfd_upc_grwth_cnt = DataFrame();
+    end
     dfo_Exp, dfo_UnExp = genbuyerclass(df_cdma_dump, udj_avg_expsd_pst, udj_avg_cntrl_pst);
     exposed_buyer_by_week, cumulative_by_week = Buyer_Frequency_Characteristics(hhcounts_date, df_cdma_dump);
     Byr_Frq_Dgtl = freq_HH_buying(combined);
@@ -1225,7 +1238,7 @@ function viz_RUN(template_dir::String, template_file::String, out_dir::String, o
     df_dolocc_bins = dolocc_bins(descDump);
     df_raw_metrics = sales_metrics(df_desc);
     df_matched_metrics = sales_metrics(descDump);
-    print("\n\n\n\t---> STEP 2 completed!\n\n\n")
+    print("\n\n\n\t---> STEP 2 completed!\n\n\n\n")
 
     println("********************************************************************************")
     println("STEP 3: Create Web Page Visualization Tool")
@@ -1234,12 +1247,12 @@ function viz_RUN(template_dir::String, template_file::String, out_dir::String, o
     data, label, extra = viz_out_prep(dfd_fr_shr_ndx, exposed_net, control_net, dfd_upc_grwth_cnt, dfo_Exp, dfo_UnExp, exposed_buyer_by_week, cumulative_by_week, Byr_Frq_Dgtl, Tm_1st_by_lst_xpsur_Dgtl, Frst_Buy_Frq_Dgtl_std, Tot_Frq_Dgtl, dfd_Cum_IMP, df_proscore_dist, df_retailer_dist, df_dolocc_bins, df_raw_metrics, df_matched_metrics);
 
     # Load web page template, insert the relevant data and labels, and save the final HTML file to disk
-    htmldoc = read(template_dir*"/"*template_file, String);
+    htmldoc = read(template_file, String);
     htmldoc = viz_write(htmldoc, data, label; extra = extra);
-    write(out_dir*"/"*out_file_name*".html", htmldoc);
+    write(out_file, htmldoc);
 
-    print("\n\nGenerated HTML VISUALIZATION TOOL and saved to\n"*out_dir*"\nas "*out_file_name*".html\n")
-    print("\n\n\n\t---> STEP 3 completed!\n\n")
+    print("\n\n\nGenerated HTML VISUALIZATION TOOL and saved to\n\nas "*out_file*".html\n")
+    print("\n\n\n\t---> STEP 3 completed!\n\n\n\n")
     print("-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n")
     println("")
 end

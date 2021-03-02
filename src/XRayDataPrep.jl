@@ -7,9 +7,9 @@ using CSV, DataFrames, DataStructures, Dates
 export viz_dataprep
 
 # COMMON inputs
-function common_load_input()
+function common_load_input(dump_file::String)
     # Load `match dump` file
-    descDump = CSV.read("./matchdump/descDump.csv", DataFrame); # Required for `df_cdma_dump` creation: is it ready before Lift?
+    descDump = CSV.read(dump_file, DataFrame); # Required for `df_cdma_dump` creation: is it ready before Lift?
  
     # Load `orig.csv` file
     orig_cols_cdma = [:panid, :group, :prd_1_net_pr_pre, :prd_2_net_pr_pre, :prd_3_net_pr_pre, :prd_4_net_pr_pre, :prd_5_net_pr_pre, :prd_6_net_pr_pre, :prd_7_net_pr_pre, :prd_8_net_pr_pre, :prd_9_net_pr_pre, :prd_10_net_pr_pre, :prd_0_net_pr_pos, :prd_1_net_pr_pos, :prd_2_net_pr_pos, :prd_3_net_pr_pos, :prd_4_net_pr_pos, :prd_5_net_pr_pos, :prd_6_net_pr_pos, :prd_7_net_pr_pos, :prd_8_net_pr_pos, :prd_9_net_pr_pos, :prd_10_net_pr_pos, :buyer_pos_p1, :buyer_pos_p0, :buyer_pre_52w_p1, :buyer_pre_52w_p0, :trps_pos_p1];
@@ -17,6 +17,7 @@ function common_load_input()
     orig_cols = unique(vcat(orig_cols_cdma, orig_cols_desc));
 
     orig_hdr_df = CSV.read("./origHead.csv", DataFrame; header=0, threaded=true);
+    orig_hdr_df[:Column1] = lowercase.(orig_hdr_df[:Column1]);  # Make sure all column names are lowercase - not default in MTA
     orig_hdr = Symbol.(convert(Vector{String}, orig_hdr_df[:Column1]));
     for i in 1:length(orig_hdr) orig_hdr[i] = orig_hdr[i] == :iri_link_id ? :banner : orig_hdr[i] end
     for i in 1:length(orig_hdr) orig_hdr[i] = orig_hdr[i] == :proscore ? :model : orig_hdr[i] end
@@ -37,7 +38,7 @@ function common_load_input()
 end
 
 # CDMA data prep
-function cdma_load_input()
+function cdma_load_input(scored_file::String)
     # Load CDMA specific input files
     brand_data = CSV.read("./CDMA/brand_data.csv", DataFrame);
     buyer_week_data = CSV.read("./CDMA/buyer_week_data.csv", DataFrame);
@@ -46,7 +47,7 @@ function cdma_load_input()
     upc_data = CSV.read("./CDMA/upc_data.csv", DataFrame);
 
     # Load `scored.csv` and read the 2 values needed for the adjustments
-    scored = CSV.read("./scored.csv", DataFrame);
+    scored = CSV.read(scored_file, DataFrame);
     udj_avg_expsd_pst = scored[(scored[:MODEL_DESC] .== "Total Campaign") .& (scored[:dependent_variable] .== "pen"), :UDJ_AVG_EXPSD_HH_PST][1];
     udj_avg_cntrl_pst = scored[(scored[:MODEL_DESC] .== "Total Campaign") .& (scored[:dependent_variable] .== "pen"), :UDJ_AVG_CNTRL_HH_PST][1];
 
@@ -161,9 +162,9 @@ function desc_base_dataprep(brand_upc::DataFrame, descDump::DataFrame)
 end
 
 # Module signature function
-function viz_dataprep()
-    descDump, df_cdma, df_desc = common_load_input();
-    brand_data, buyer_week_data, hhcounts_date, imp_week, upc_data, udj_avg_expsd_pst, udj_avg_cntrl_pst = cdma_load_input();   # imp_week not needed (it's required for Unify only!)
+function viz_dataprep(scored_file::String="./scored.csv", dump_file::String="./dump.csv")
+    descDump, df_cdma, df_desc = common_load_input(dump_file);
+    brand_data, buyer_week_data, hhcounts_date, imp_week, upc_data, udj_avg_expsd_pst, udj_avg_cntrl_pst = cdma_load_input(scored_file);   # imp_week not needed (it's required for Unify only!)
     df_cdma_dump = cdma_base_dataprep(df_cdma, descDump);
     brand_upc = desc_load_input();
     df_upcs_mx = desc_base_dataprep(brand_upc, descDump);
