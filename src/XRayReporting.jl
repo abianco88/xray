@@ -309,7 +309,7 @@ function freq_HH_Cum1stpur(combined::DataFrame, freq_index::DataFrame)
 
     #Calculate 1st Buy by Dynamic Frequency Buckets
     Exposed_Buyer_dyn = deepcopy(combined[combined[:Number_exposure_before_1st_buy] .!= 0, [:Number_exposure_before_1st_buy]]);
-    Exposed_Buyer_dyn[:Exposures] = "Exposures_le_"*string(freq_index[:frq_index][1]);    
+    Exposed_Buyer_dyn[:Exposures] = "Exposures_le_"*string(freq_index[:frq_index][1]);
     for dec in range(1, length(freq_index[:frq_index])-2);
         Exposed_Buyer_dyn[(Exposed_Buyer_dyn[:Number_exposure_before_1st_buy] .> freq_index[:frq_index][dec]) .& (Exposed_Buyer_dyn[:Number_exposure_before_1st_buy] .<= freq_index[:frq_index][dec+1]) .& (freq_index[:frq_index][dec] .!= freq_index[:frq_index][dec+1]), :Exposures] = "Exposures_g_"*string(freq_index[:frq_index][dec])*"_le_"*string(freq_index[:frq_index][dec+1]);
     end
@@ -581,7 +581,7 @@ function format_unify_reports(Tm_1st_by_lst_xpsur_Dgtl::DataFrame, exposed_buyer
         for i in 1:(nrow(Time_1st_buy)-1)
             if i == 10
                 push!(Lift_Buyer_char_template, [string("10+"), "FRQ1388", end_week-start_week+1, start_week, start_week+i-1, "BUYER_CHAR_WEEK_FREQUENCY", 0, 0, 0, 0, 0, Frst_Buy_Frq_Dgtl_std[i, :Percentage_of_total_1st_purchases], Time_1st_buy[i, :Percentage_of_total_buying_HHs], 0, 0, 0, 0, 0, 0, 0, 0, ChannelCode]);
-            else	
+            else
                 push!(Lift_Buyer_char_template, [string(i), FREQ*string(i), end_week-start_week+1, start_week, start_week+i-1, "BUYER_CHAR_WEEK_FREQUENCY", 0, 0, 0, 0, 0, Frst_Buy_Frq_Dgtl_std[i, :Percentage_of_total_1st_purchases], Time_1st_buy[i, :Percentage_of_total_buying_HHs], 0, 0, 0, 0, 0, 0, 0, 0, ChannelCode]);
             end
         end
